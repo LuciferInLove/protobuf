@@ -48,6 +48,9 @@ type Marshaler struct {
 	// AnyResolver is used to resolve the google.protobuf.Any well-known type.
 	// If unset, the global registry is used by default.
 	AnyResolver AnyResolver
+
+	// Whether to marshal int64 and uint64 values as integers as opposed to strings.
+	Int64Uint64asIntegers bool
 }
 
 // JSONPBMarshaler is implemented by protobuf messages that customize the
@@ -545,7 +548,11 @@ func (w *jsonWriter) marshalSingularValue(fd protoreflect.FieldDescriptor, v pro
 				return nil
 			}
 		case int64, uint64:
-			w.write(fmt.Sprintf(`"%d"`, v.Interface()))
+			if w.Int64Uint64asIntegers {
+				w.write(fmt.Sprintf(`%d`, v.Interface()))
+			} else {
+				w.write(fmt.Sprintf(`"%d"`, v.Interface()))
+			}
 			return nil
 		}
 
